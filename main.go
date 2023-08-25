@@ -1,1 +1,28 @@
 package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"github.com/mo7rex/api-gin/controllers"
+	"github.com/mo7rex/api-gin/database"
+)
+
+func init() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+	database.ConnectToDatabase()
+
+}
+
+func main() {
+	fmt.Println("Hello world")
+	r := gin.Default()
+	r.POST("/post", controllers.CreatePost)
+	r.Run()
+
+}
