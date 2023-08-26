@@ -22,7 +22,11 @@ func init() {
 func main() {
 	fmt.Println("Hello world")
 	r := gin.Default()
+	r.GET("/post", controllers.ShowAllPosts)
+	r.GET("/post/:id", controllers.ShowOnePost)
 	r.POST("/post", controllers.CreatePost)
+	r.PUT("/post/:id", controllers.UpdatePost)
+	r.DELETE("/post/:id", controllers.DeleteOnePost)
 	r.Run()
 
 }
