@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -17,6 +18,14 @@ func init() {
 }
 
 func main() {
-	database.DB.AutoMigrate(&model.Post{})
+	err := database.DB.AutoMigrate(&model.Account{}, &model.Post{})
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+	// fmt.Println(database.DB.Migrator().CreateConstraint(&model.Account{}, "Post"))
+	// fmt.Println(database.DB.Migrator().CreateConstraint(&model.Account{}, "fk_accounts_post"))
+	// fmt.Println(database.DB.Migrator().HasConstraint(&model.Account{}, "Post"))
+	// fmt.Println(database.DB.Migrator().HasConstraint(&model.Account{}, "fk_accounts_post"))
 
 }

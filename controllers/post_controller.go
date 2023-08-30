@@ -8,16 +8,17 @@ import (
 
 func CreatePost(ctx *gin.Context) {
 	var body struct {
-		Title string
-		Body  string
+		Title     string
+		Body      string
+		AccountID uint
 	}
 	ctx.Bind(&body)
-	if body.Title == "" || body.Body == "" {
+	if body.Title == "" || body.Body == "" || body.AccountID == 0 {
 		ctx.Status(400)
 		ctx.JSON(400, gin.H{"Error": "Bad Request"})
 		return
 	}
-	post := model.Post{Title: body.Title, Body: body.Body}
+	post := model.Post{Title: body.Title, Body: body.Body, AccountID: body.AccountID}
 	res := database.DB.Create(&post)
 	if res.Error != nil {
 		ctx.Status(400)

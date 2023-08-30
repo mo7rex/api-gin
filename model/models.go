@@ -1,9 +1,23 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"time"
 
+	"gorm.io/gorm"
+)
+
+type Account struct {
+	ID          uint `gorm:"primaryKey"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	FullName    string  `json:"full_name" validate:"required"`
+	PhoneNumber string  `json:"phone_number" validate:"required,min=4,max=13"`
+	Gender      string  `json:"gender" validate:"required,eq=MALE|eq=FEMALE"`
+	Post        []*Post `json:"post,omitempty" gorm:"constraint:OnDelete:CASCADE;"`
+}
 type Post struct {
 	gorm.Model
-	Title string `json:"title,omitempty"`
-	Body  string `json:"body,omitempty"`
+	AccountID uint   `json:"account_id"`
+	Title     string `json:"title,omitempty"`
+	Body      string `json:"body,omitempty"`
 }
