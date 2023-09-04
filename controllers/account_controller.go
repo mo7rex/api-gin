@@ -1,24 +1,37 @@
 package controllers
 
 import (
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/mo7rex/api-gin/database"
 	"github.com/mo7rex/api-gin/model"
+	"golang.org/x/crypto/bcrypt"
 )
 
-func CreateAccount(ctx *gin.Context) {
+func SignUp(ctx *gin.Context) {
 	var input struct {
+		Email        string
+		Password     string
 		Full_name    string
 		Phone_number string
 		Gender       string
 	}
-	ctx.Bind(&input)
-	if input.Full_name == "" || input.Gender == "" || input.Phone_number == "" {
+	err := ctx.Bind(&input)
+	if err != nil {
 		ctx.Status(400)
 		ctx.JSON(400, gin.H{"Error": "Bad Request"})
 		return
 	}
-	account := model.Account{FullName: input.Full_name, PhoneNumber: input.Phone_number, Gender: input.Gender}
+	//hash the pass
+	hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to hash password"})
+	}
+	account := model.Account{FullName: input.Full_name, PhoneNumber: input.Phone_number, Gender: input.Gender, Email: input.Email, Password: string(hash)}
 	res := database.DB.Create(&account)
 	if res.Error != nil {
 		ctx.Status(400)
@@ -26,6 +39,45 @@ func CreateAccount(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, gin.H{"Account": account})
+
+}
+
+func Login(ctx *gin.Context) {
+	var input struct {
+		Email    string
+		Password string
+	}
+	err := ctx.Bind(&input)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+		return
+	}
+	//check the email
+	var account model.Account
+	database.DB.Find(&account, "email= ?", input.Email)
+	if account.Email == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"Error!": "Invalid email"})
+		return
+	}
+	//compare the sent password with the hash
+	error := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(input.Password))
+	if error != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid Password"})
+		return
+	}
+	//genrate the jwt token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": account.ID,
+		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+	})
+	tokenstring, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"Error": "error in genrate the token"})
+		return
+	}
+	ctx.JSON(http.StatusBadRequest, gin.H{
+		"token": tokenstring,
+	})
 
 }
 

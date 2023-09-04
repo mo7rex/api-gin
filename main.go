@@ -29,7 +29,8 @@ func main() {
 	r.DELETE("/post/:id", controllers.DeleteOnePost)
 
 	r.GET("/account/:account_id", controllers.GetAllAccountsWithPosts)
-	r.POST("/account", controllers.CreateAccount)
+	r.POST("/signup", controllers.SignUp)
+	r.POST("/login", controllers.Login)
 	r.DELETE("/account/:id", controllers.DeleteAccount)
 	r.Run()
 
