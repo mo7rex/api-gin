@@ -75,10 +75,18 @@ func Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"Error": "error in genrate the token"})
 		return
 	}
-	ctx.JSON(http.StatusBadRequest, gin.H{
-		"token": tokenstring,
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("auth", tokenstring, 3600*24*30, "", "", false, true)
+	ctx.JSON(http.StatusOK, gin.H{
+		"200": "OK",
 	})
 
+}
+func LogOut(ctx *gin.Context) {
+	ctx.SetCookie("auth", "", -1, "", "", false, true)
+	ctx.JSON(http.StatusOK, gin.H{
+		"200": "OK",
+	})
 }
 
 func GetAllAccount(ctx *gin.Context) {
@@ -130,4 +138,10 @@ func DeleteAccount(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, gin.H{"OK": "The account is deleted"})
+}
+
+func Validate(ctx *gin.Context) {
+	account, _ := ctx.Get("account")
+
+	ctx.JSON(http.StatusOK, gin.H{"account": account})
 }

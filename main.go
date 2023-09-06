@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/mo7rex/api-gin/controllers"
 	"github.com/mo7rex/api-gin/database"
+	"github.com/mo7rex/api-gin/middleware"
 )
 
 func init() {
@@ -31,7 +32,10 @@ func main() {
 	r.GET("/account/:account_id", controllers.GetAllAccountsWithPosts)
 	r.POST("/signup", controllers.SignUp)
 	r.POST("/login", controllers.Login)
+	r.GET("/logout", controllers.LogOut)
 	r.DELETE("/account/:id", controllers.DeleteAccount)
+
+	r.GET("/auth", middleware.RequireAuth, controllers.Validate)
 	r.Run()
 
 }
